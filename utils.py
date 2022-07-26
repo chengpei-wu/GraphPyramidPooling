@@ -11,8 +11,8 @@ def load_network(path, isd, roubustness):
     networks = mat['res']
     x = []
     y = []
-    for i in range(1):
-        for j in range(1):
+    for i in range(len_net):
+        for j in range(len_instance):
             print('\r',
                   f'loading {i * len_instance + j + 1} / {len_net * len_instance}  network...',
                   end='',

@@ -6,7 +6,6 @@ from sklearn.preprocessing import MinMaxScaler
 def graph2vec(G):
     ranking_vec = node_attr_ranking(G)
     pooling_vector = pyramid_pooling(ranking_vec)
-    print(pooling_vector.shape)
     return pooling_vector
 
 
