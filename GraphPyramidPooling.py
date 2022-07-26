@@ -9,7 +9,7 @@ def graph2vec(G):
     return pooling_vector
 
 
-def node_attr_ranking(G, label='betweenness'):
+def node_attr_ranking(G, label='degree'):
     ranking_vec = []
     if label == 'degree':
         ranking_vec = node_degree_ranking(G)
@@ -40,15 +40,35 @@ def node_betweenness_ranking(G, attr=['degree', 'clustering']):
 def node_degree_ranking(G, attr=['degree', 'clustering']):
     scaler = MinMaxScaler()
     ranking_nodes = sorted(nx.degree(G), key=lambda x: x[1], reverse=True)
-    ranking_degree = [n[1] for n in ranking_nodes]
-    ranking_degree = scaler.fit_transform(np.array(ranking_degree).reshape((len(ranking_degree), 1)))
-    return ranking_degree.flatten()
+    ranking_nodes_id = [n[0] for n in ranking_nodes]
+    ranking_vec = []
+    for i in attr:
+        if i == 'degree':
+            degrees = nx.degree(G)
+            degree_vec = [degrees[k] for k in ranking_nodes_id]
+            ranking_vec.append(degree_vec)
+        if i == 'clustering':
+            clusterings = list(nx.clustering(G).items())
+            clustering_vec = [clusterings[k][1] for k in ranking_nodes_id]
+            ranking_vec.append(clustering_vec)
+    return np.array(ranking_vec)
 
 
 def node_clustering_ranking(G, attr=['degree', 'clustering']):
+    scaler = MinMaxScaler()
     ranking_nodes = sorted(nx.clustering(G).items(), key=lambda x: x[1], reverse=True)
-    ranking_clustering = [n[1] for n in ranking_nodes]
-    return ranking_clustering
+    ranking_nodes_id = [n[0] for n in ranking_nodes]
+    ranking_vec = []
+    for i in attr:
+        if i == 'degree':
+            degrees = nx.degree(G)
+            degree_vec = [degrees[k] for k in ranking_nodes_id]
+            ranking_vec.append(degree_vec)
+        if i == 'clustering':
+            clusterings = list(nx.clustering(G).items())
+            clustering_vec = [clusterings[k][1] for k in ranking_nodes_id]
+            ranking_vec.append(clustering_vec)
+    return np.array(ranking_vec)
 
 
 def pyramid_pooling(vec, pooling_sizes=None):

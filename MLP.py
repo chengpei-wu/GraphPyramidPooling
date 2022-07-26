@@ -28,7 +28,7 @@ class MLP:
 
     def init_model(self):
         model = Sequential()
-        model.add(Dense(512, activation='relu', input_shape=(self.batch_size, 93)))
+        model.add(Dense(512, activation='relu', input_shape=(self.batch_size, 62)))
         model.add(Dense(1024, activation='relu'))
         model.add(Dense(21, activation='hard_sigmoid'))
         model.compile(loss='mean_squared_error',
