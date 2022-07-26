@@ -9,21 +9,35 @@ def graph2vec(G):
     return pooling_vector
 
 
-def node_attr_ranking(G, label=None):
+def node_attr_ranking(G, label='betweenness'):
     ranking_vec = []
-    if label is None:
-        label = ['degree', 'betweenness', 'clustering']
-    for i in label:
-        if i == 'degree':
-            ranking_vec.append(node_degree_ranking(G))
-        if i == 'betweenness':
-            ranking_vec.append(node_betweenness_ranking(G))
-        if i == 'clustering':
-            ranking_vec.append(node_clustering_ranking(G))
+    if label == 'degree':
+        ranking_vec = node_degree_ranking(G)
+    if label == 'betweenness':
+        ranking_vec = node_betweenness_ranking(G)
+    if label == 'clustering':
+        ranking_vec = node_clustering_ranking(G)
     return np.array(ranking_vec)
 
 
-def node_degree_ranking(G):
+def node_betweenness_ranking(G, attr=['degree', 'clustering']):
+    scaler = MinMaxScaler()
+    ranking_nodes = sorted(nx.betweenness_centrality(G).items(), key=lambda x: x[1], reverse=True)
+    ranking_nodes_id = [n[0] for n in ranking_nodes]
+    ranking_vec = []
+    for i in attr:
+        if i == 'degree':
+            degrees = nx.degree(G)
+            degree_vec = [degrees[k] for k in ranking_nodes_id]
+            ranking_vec.append(degree_vec)
+        if i == 'clustering':
+            clusterings = list(nx.clustering(G).items())
+            clustering_vec = [clusterings[k][1] for k in ranking_nodes_id]
+            ranking_vec.append(clustering_vec)
+    return np.array(ranking_vec)
+
+
+def node_degree_ranking(G, attr=['degree', 'clustering']):
     scaler = MinMaxScaler()
     ranking_nodes = sorted(nx.degree(G), key=lambda x: x[1], reverse=True)
     ranking_degree = [n[1] for n in ranking_nodes]
@@ -31,15 +45,7 @@ def node_degree_ranking(G):
     return ranking_degree.flatten()
 
 
-def node_betweenness_ranking(G):
-    scaler = MinMaxScaler()
-    ranking_nodes = sorted(nx.betweenness_centrality(G).items(), key=lambda x: x[1], reverse=True)
-    ranking_betweenness = [n[1] for n in ranking_nodes]
-    ranking_betweenness = scaler.fit_transform(np.array(ranking_betweenness).reshape((len(ranking_betweenness), 1)))
-    return ranking_betweenness.flatten()
-
-
-def node_clustering_ranking(G):
+def node_clustering_ranking(G, attr=['degree', 'clustering']):
     ranking_nodes = sorted(nx.clustering(G).items(), key=lambda x: x[1], reverse=True)
     ranking_clustering = [n[1] for n in ranking_nodes]
     return ranking_clustering
