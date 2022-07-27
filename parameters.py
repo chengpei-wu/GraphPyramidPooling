@@ -1,4 +1,4 @@
-pooling_sizes = [1, 2, 4, 8, 16]
+pooling_sizes = [1, 2, 4, 8, 15]
 
 epochs = 200
 batch_size = 4
