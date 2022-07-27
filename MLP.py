@@ -29,8 +29,9 @@ class MLP:
 
     def init_model(self):
         model = Sequential()
-        model.add(Dense(512, activation='relu', input_shape=self.input_shape))
+        model.add(Dense(1024, activation='relu', input_shape=self.input_shape))
         model.add(Dense(1024, activation='relu'))
+        model.add(Dense(256, activation='relu'))
         model.add(Dense(21, activation='hard_sigmoid'))
         model.compile(loss='mean_squared_error',
                       optimizer=self.optimizer,
@@ -42,8 +43,8 @@ class MLP:
         filepath = f'{model_path}.hdf5'
         CheckPoint = ModelCheckpoint(filepath, monitor='val_mae', verbose=1, save_best_only=True,
                                      mode='min')
-        on_Plateau = ReduceLROnPlateau(monitor='val_mae', patience=4, factor=0.5, min_delta=1e-3,
-                                       verbose=1)
+        on_Plateau = ReduceLROnPlateau(monitor='val_mae', patience=20, factor=0.5, min_delta=1e-4,
+                                       verbose=1, min_lr=1e-4)
         callbacks_list = [CheckPoint, on_Plateau]
         x, y = shuffle(x, y)
         self.model.fit(

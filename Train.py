@@ -2,12 +2,15 @@ from utils import load_data
 from MLP import MLP
 from parameters import *
 
+path = f'{training_size}_{atk}_isd{isd}_isw{isw}'
 x, y = load_data(
-    path='./data/test/r(300,700)_nrnd_isd0_isw0.mat',
-    isd=False,
-    roubustness='yc',
+    path=f'./data/train/{path}.mat',
+    isd=isd,
+    roubustness=robustness,
     pooling_sizes=pooling_sizes
 )
+
+print(x.shape)
 
 mlp = MLP(
     epochs=epochs,
@@ -16,4 +19,4 @@ mlp = MLP(
     model=None,
     pooling_sizes=pooling_sizes
 )
-mlp.fit(x, y, './models/test_model')
+mlp.fit(x, y, f'./models/{path}_{robustness}')

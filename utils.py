@@ -26,7 +26,7 @@ def load_data(path, isd, roubustness, pooling_sizes):
                 G = nx.from_numpy_matrix(adj, create_using=nx.DiGraph())
             else:
                 G = nx.from_numpy_matrix(adj, create_using=nx.Graph())
-            x.append(graph2vec(G), pooling_sizes)
+            x.append(graph2vec(G, pooling_sizes))
             if roubustness == 'lc':
                 y.append(networks[i, j]['lc'][0][0])
             if roubustness == 'yc':
