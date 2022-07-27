@@ -13,12 +13,13 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = '3'  # Ignore warning
 
 
 class MLP:
-    def __init__(self, epochs=30, batch_size=4, valid_proportion=0.1, model=None):
+    def __init__(self, epochs=30, batch_size=4, valid_proportion=0.1, model=None, pooling_sizes=[1, 2, 4]):
         self.epochs = epochs
         self.batch_size = batch_size
         self.metrics = ['mae', 'mse']
         self.optimizer = optimizers.SGD(learning_rate=1e-1)
         self.valid_proportion = valid_proportion
+        self.input_shape = (batch_size, sum(pooling_sizes))
         if not model:
             # initial model for training
             self.model = self.init_model()
@@ -28,7 +29,7 @@ class MLP:
 
     def init_model(self):
         model = Sequential()
-        model.add(Dense(512, activation='relu', input_shape=(self.batch_size, 62)))
+        model.add(Dense(512, activation='relu', input_shape=self.input_shape))
         model.add(Dense(1024, activation='relu'))
         model.add(Dense(21, activation='hard_sigmoid'))
         model.compile(loss='mean_squared_error',

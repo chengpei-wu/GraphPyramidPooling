@@ -3,9 +3,9 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
 
-def graph2vec(G):
+def graph2vec(G, pooling_sizes):
     ranking_vec = node_attr_ranking(G)
-    pooling_vector = pyramid_pooling(ranking_vec)
+    pooling_vector = pyramid_pooling(ranking_vec, pooling_sizes)
     return pooling_vector
 
 

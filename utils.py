@@ -4,7 +4,7 @@ import scipy.io as sio
 from GraphPyramidPooling import graph2vec
 
 
-def load_network(path, isd, roubustness):
+def load_data(path, isd, roubustness, pooling_sizes):
     mat = sio.loadmat(path)
     len_net = len(mat['res'])
     len_instance = len(mat['res'][0])
@@ -22,7 +22,7 @@ def load_network(path, isd, roubustness):
                 G = nx.from_numpy_matrix(adj, create_using=nx.DiGraph())
             else:
                 G = nx.from_numpy_matrix(adj, create_using=nx.Graph())
-            x.append(graph2vec(G))
+            x.append(graph2vec(G), pooling_sizes)
             if roubustness == 'lc':
                 y.append(networks[i, j]['lc'][0][0])
             if roubustness == 'yc':
