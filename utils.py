@@ -5,7 +5,7 @@ import scipy.io as sio
 from GraphPyramidPooling import graph2vec
 from sklearn.preprocessing import OneHotEncoder
 from dgl.data import *
-
+from parameters import pooling_sizes
 
 def load_data(path, isd, roubustness, pooling_sizes):
     # for regression task (robustness prediction)
@@ -40,25 +40,27 @@ def load_dgl_data(pooling_sizes, dataset='REDDIT-BINARY'):
     # for classification task (graph classification, real-world networks)
     enc = OneHotEncoder()
     data = TUDataset(dataset)
+    num_classes = data.num_classes
+    num_node_attr = 0
     x = []
     labels = []
-    adj0 = data[0][0].adjacency_matrix().to_dense().numpy()
-    if np.sum(adj0.T != adj0):
-        isd = 1
-    else:
-        isd = 0
+    has_node_attr = 'node_attr' in data[0][0].nodes[0][0].keys()
+    if has_node_attr:
+        num_node_attr = len(data[0][0].nodes[0][0]['node_attr'].numpy().flatten())
+        print(num_node_attr)
     for id in range(len(data)):
         print('\r',
               f'loading {id} / {len(data)}  network...',
               end='',
               flush=True)
         graph, label = data[id]
-        adj = graph.adjacency_matrix().to_dense().numpy()
-        if isd:
-            G = nx.from_numpy_matrix(adj, create_using=nx.DiGraph())
-        else:
-            G = nx.from_numpy_matrix(adj, create_using=nx.Graph())
+        G = nx.DiGraph(dgl.to_networkx(graph))
+        if has_node_attr:
+            for i in range(G.number_of_nodes()):
+                G.nodes[i]['node_attr'] = graph.nodes[i][0]['node_attr'].numpy().flatten()
+        # print(G.nodes[0])
         x.append(graph2vec(G, pooling_sizes))
         labels.append(label.numpy())
-    y = enc.fit_transform(labels).toarray()
-    return x, y
+    y = enc.fit_transform(np.array(labels).reshape(-1,1)).toarray()
+    x = np.array(x)
+    return x, y, num_classes, num_node_attr
