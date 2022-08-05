@@ -7,35 +7,6 @@ from sklearn.preprocessing import OneHotEncoder
 from dgl.data import *
 
 
-def load_data(path, isd, roubustness, pooling_sizes):
-    # for regression task (robustness prediction)
-    mat = sio.loadmat(path)
-    len_net = len(mat['res'])
-    len_instance = len(mat['res'][0])
-    networks = mat['res']
-    x = []
-    y = []
-    for i in range(len_net):
-        for j in range(len_instance):
-            print('\r',
-                  f'loading {i * len_instance + j + 1} / {len_net * len_instance}  network...',
-                  end='',
-                  flush=True)
-            adj = networks[i, j]['adj'][0, 0].todense()
-            if isd:
-                G = nx.from_numpy_matrix(adj, create_using=nx.DiGraph())
-            else:
-                G = nx.from_numpy_matrix(adj, create_using=nx.Graph())
-            x.append(graph2vec(G, pooling_sizes))
-            if roubustness == 'lc':
-                y.append(networks[i, j]['lc'][0][0])
-            if roubustness == 'yc':
-                y.append(networks[i, j]['yc'][0][0])
-    x = np.array(x)
-    y = np.array(y)
-    return x, y
-
-
 def load_dgl_data(dataset, pooling_sizes, rank_label, pooling_attr, pooling_way):
     # for classification task (graph classification, real-world networks)
     enc = OneHotEncoder()
@@ -48,7 +19,7 @@ def load_dgl_data(dataset, pooling_sizes, rank_label, pooling_attr, pooling_way)
     if has_node_attr:
         num_node_attr = len(data[0][0].nodes[0][0]['node_attr'].numpy().flatten())
         print(num_node_attr)
-    for id in range(len(data)):
+    for id in range(1):
         print('\r',
               f'loading {id} / {len(data)}  network...',
               end='',
@@ -71,3 +42,13 @@ def load_dgl_data(dataset, pooling_sizes, rank_label, pooling_attr, pooling_way)
     y = enc.fit_transform(np.array(labels).reshape(-1, 1)).toarray()
     x = np.array(x)
     return x, y, num_classes, num_node_attr
+
+
+x, y, _, _ = load_dgl_data(
+    dataset='MUTAG',
+    pooling_sizes=[1, 2, 4, 8],
+    rank_label='degree',
+    pooling_attr=['degree', 'average_neighbor_degree'],
+    pooling_way='max'
+)
+print(x)

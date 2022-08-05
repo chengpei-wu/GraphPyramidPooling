@@ -1,9 +1,9 @@
 # parameters of GraphPyramidPooling
-pooling_sizes = [1, 2, 4, 8, 16, 32]
-ranking_nodes_by = 'degree'
-# pooling_attr = ['degree', 'neighbor_average_degree']
-pooling_attr = ['degree', 'clustering']
-max_pooling = True
+pooling_sizes = [8]
+rank_label = 'degree'
+# pooling_attr = ['degree', 'betweenness', 'clustering', 'average_neighbor_degree']
+pooling_attr = ['degree']
+pooling_way = 'mean'
 num_node_attr = 0
 
 # parameters of MLP
@@ -14,18 +14,17 @@ valid = 0.1
 # For grpah classification
 datasets = [
     'MUTAG',
-    'DD',
-    'NCI1',
-    'PTC_MR',
-    'PROTEINS',
-    'COLLAB',
-    'IMDB-BINARY',
-    'IMDB-MULTI',
-    'REDDIT-BINARY',
-    'REDDIT-MULTI-5K',
+    # 'DD',
+    # 'NCI1',
+    # 'PTC_MR',
+    # 'PROTEINS',
+    # 'COLLAB',
+    # 'IMDB-BINARY',
+    # 'IMDB-MULTI',
+    # 'REDDIT-BINARY',
+    # 'REDDIT-MULTI-5K',
     # 'REDDIT-MULTI-12K'
 ]
-
 
 # For network robustness prediction
 training_size = '(700,1300)'

@@ -1,17 +1,27 @@
-from utils import load_data, load_dgl_data
-from MLP import MLP
+from utils import load_dgl_data
 from parameters import *
 from sklearn.utils import shuffle
 import numpy as np
 from sklearn.svm import SVC
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
+scaler = StandardScaler()
 for data_name in datasets:
-    # data_name = 'DD'
-    x, y, num_classes,_ = load_dgl_data(pooling_sizes, dataset=data_name)
-    print(x.shape, y.shape)
+    x, y, num_classes, _ = load_dgl_data(
+        dataset=data_name,
+        pooling_sizes=pooling_sizes,
+        rank_label=rank_label,
+        pooling_attr=pooling_attr,
+        pooling_way=pooling_way
+    )
+    print(x)
+    print(np.max(x))
+    x = scaler.fit_transform(np.array(x))
+    print(x)
+
     # 10 times of 10 fold corss validation
     accuracy = []
-    for i in range(1):
+    for i in range(10):
         x, y = shuffle(x, y)
         N = len(x) // 10
         for K in range(10):
@@ -22,10 +32,10 @@ for data_name in datasets:
                 x_train, y_train = np.concatenate((x[:K * N], x[(K + 1) * N:])), np.concatenate(
                     (y[:K * N], y[(K + 1) * N:]))
             svm_rbf = SVC(kernel='rbf')
-            svm_rbf.fit(x_train,np.argmax(y_train,axis=1))                     
-            acc = svm_rbf.score(x_test,np.argmax(y_test,axis=1))
+            svm_rbf.fit(x_train, np.argmax(y_train, axis=1))
+            acc = svm_rbf.score(x_test, np.argmax(y_test, axis=1))
             accuracy.append(acc)
-            print('test accuracy: ',acc)
-    # accuracy =  np.array(accuracy).reshape(-1, 10)
-    # print(f'{data_name}: ',np.max(np.mean(accuracy,axis=1)))
+            # print('test accuracy: ', acc)
+    t = np.array(accuracy).reshape(-1, 10)
+    print(f'{data_name}: ', np.mean(t, axis=1))
     np.save(f'./accuracy/SVM/{data_name}_cv', np.array(accuracy).reshape(-1, 10))
