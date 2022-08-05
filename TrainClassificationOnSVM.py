@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.svm import SVC
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
-scaler = StandardScaler()
+scaler = MinMaxScaler()
 for data_name in datasets:
     x, y, num_classes, _ = load_dgl_data(
         dataset=data_name,
@@ -14,10 +14,9 @@ for data_name in datasets:
         pooling_attr=pooling_attr,
         pooling_way=pooling_way
     )
-    print(x)
-    print(np.max(x))
-    x = scaler.fit_transform(np.array(x))
-    print(x)
+    print(x.shape)
+    x = scaler.fit_transform(x)
+    print(x[0])
 
     # 10 times of 10 fold corss validation
     accuracy = []
@@ -31,7 +30,9 @@ for data_name in datasets:
             else:
                 x_train, y_train = np.concatenate((x[:K * N], x[(K + 1) * N:])), np.concatenate(
                     (y[:K * N], y[(K + 1) * N:]))
-            svm_rbf = SVC(kernel='rbf')
+            svm_rbf = SVC(
+                kernel='rbf'
+            )
             svm_rbf.fit(x_train, np.argmax(y_train, axis=1))
             acc = svm_rbf.score(x_test, np.argmax(y_test, axis=1))
             accuracy.append(acc)

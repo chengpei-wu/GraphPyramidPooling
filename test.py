@@ -2,7 +2,7 @@ import dgl
 import networkx as nx
 import numpy as np
 import scipy.io as sio
-from GraphPyramidPooling import graph2vec
+from GraphPyramidPooling import graph2vec, get_neighbor_degree_set
 from sklearn.preprocessing import OneHotEncoder
 from dgl.data import *
 
@@ -26,6 +26,7 @@ def load_dgl_data(dataset, pooling_sizes, rank_label, pooling_attr, pooling_way)
               flush=True)
         graph, label = data[id]
         G = nx.DiGraph(dgl.to_networkx(graph))
+        get_neighbor_degree_set(G)
         if has_node_attr:
             for i in range(G.number_of_nodes()):
                 G.nodes[i]['node_attr'] = graph.nodes[i][0]['node_attr'].numpy().flatten()

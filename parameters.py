@@ -1,9 +1,16 @@
 # parameters of GraphPyramidPooling
-pooling_sizes = [8]
+pooling_sizes = [2, 4, 8, 16]
 rank_label = 'degree'
-# pooling_attr = ['degree', 'betweenness', 'clustering', 'average_neighbor_degree']
-pooling_attr = ['degree']
-pooling_way = 'mean'
+pooling_attr = [
+    'degree',
+    'betweenness',
+    # 'clustering',
+    # 'average_neighbor_degree',
+    'max_neighbor_degree',
+    # 'min_neighbor_degree',
+    # 'std_neighbor_degree',
+]
+pooling_way = 'max'
 num_node_attr = 0
 
 # parameters of MLP

@@ -86,6 +86,21 @@ def node_ranking_by_label(G, pooling_attr, rank_label):
             # avn_degree_vec = scaler.fit_transform(np.array(avn_degree_vec).reshape((len(avn_degree_vec), 1)))
             ranking_vec.append(avn_degree_vec)
 
+        if i == 'max_neighbor_degree':
+            max_neighbor_degree_set = [np.max(n) for n in get_neighbor_degree_set(G)]
+            maxn_degree_vec = [max_neighbor_degree_set[k] for k in ranking_nodes_id]
+            ranking_vec.append(maxn_degree_vec)
+
+        if i == 'min_neighbor_degree':
+            min_neighbor_degree_set = [np.min(n) for n in get_neighbor_degree_set(G)]
+            minn_degree_vec = [min_neighbor_degree_set[k] for k in ranking_nodes_id]
+            ranking_vec.append(minn_degree_vec)
+
+        if i == 'std_neighbor_degree':
+            std_neighbor_degree_set = [np.std(n) for n in get_neighbor_degree_set(G)]
+            stdn_degree_vec = [std_neighbor_degree_set[k] for k in ranking_nodes_id]
+            ranking_vec.append(stdn_degree_vec)
+
         if i == 'degree':
             degrees = nx.degree(G)
             degree_vec = [degrees[k] for k in ranking_nodes_id]
@@ -103,6 +118,13 @@ def node_ranking_by_label(G, pooling_attr, rank_label):
             ranking_vec.append(betweenness_vec)
 
     return np.array(ranking_vec)
+
+
+def get_neighbor_degree_set(G):
+    nodes = G.nodes()
+    degrees = nx.degree(G)
+    neighbor_degree_set = [[degrees[i] for i in list(nx.neighbors(G, n))] for n in nodes]
+    return neighbor_degree_set
 
 
 def pyramid_pooling(vec, pooling_sizes, pooling_way):
