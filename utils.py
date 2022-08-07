@@ -54,6 +54,8 @@ def load_dgl_data(dataset, pooling_sizes, rank_label, pooling_attr, pooling_way)
               end='',
               flush=True)
         graph, label = data[id]
+        # graph = dgl.to_simple_graph(graph)
+        print(nx.weisfeiler_lehman_graph_hash(G))
         G = nx.DiGraph(dgl.to_networkx(graph))
         if has_node_attr:
             for i in range(G.number_of_nodes()):

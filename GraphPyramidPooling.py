@@ -67,6 +67,9 @@ def node_ranking_by_label(G, pooling_attr, rank_label):
     elif rank_label == 'betweenness':
         ranking_nodes = sorted(nx.betweenness_centrality(G).items(), key=lambda x: x[1], reverse=True)
         ranking_nodes_id = [n[0] for n in ranking_nodes]
+    elif rank_label == 'unique':
+        ranking_nodes = sorted(nx.degree(G), key=lambda x: x[1], reverse=True)
+        print(ranking_nodes)
     ranking_vec = []
     has_node_attr = 'node_attr' in G.nodes[0].keys()
 
@@ -124,6 +127,9 @@ def get_neighbor_degree_set(G):
     nodes = G.nodes()
     degrees = nx.degree(G)
     neighbor_degree_set = [[degrees[i] for i in list(nx.neighbors(G, n))] for n in nodes]
+    for i in range(len(neighbor_degree_set)):
+        if not neighbor_degree_set[i]:
+            neighbor_degree_set[i] = [0]
     return neighbor_degree_set
 
 
