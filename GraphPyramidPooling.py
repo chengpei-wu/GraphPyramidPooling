@@ -68,8 +68,21 @@ def node_ranking_by_label(G, pooling_attr, rank_label):
         ranking_nodes = sorted(nx.betweenness_centrality(G).items(), key=lambda x: x[1], reverse=True)
         ranking_nodes_id = [n[0] for n in ranking_nodes]
     elif rank_label == 'unique':
-        ranking_nodes = sorted(nx.degree(G), key=lambda x: x[1], reverse=True)
-        print(ranking_nodes)
+        features = [[n[1]] for n in nx.degree(G)]
+        for i in range(len(features)):
+            bets = list(nx.betweenness_centrality(G).items())
+            avngs = list(nx.average_neighbor_degree(G).items())
+            features[i].append(avngs[i][1])
+            features[i].append(bets[i][1])
+        # print(nx.average_neighbor_degree(G))
+        feature_dic = dict()
+        for i in range(len(features)):
+            feature_dic[f'{i}'] = features[i]
+        # print(feature_dic)
+        feature_dic = sorted(feature_dic.items(), key=lambda x: (x[1][0], x[1][1], x[1][2]), reverse=True)
+        # print(feature_dic)
+        ranking_nodes_id = [int(n[0]) for n in feature_dic]
+        # print(ranking_nodes_id)
     ranking_vec = []
     has_node_attr = 'node_attr' in G.nodes[0].keys()
 
@@ -135,9 +148,13 @@ def get_neighbor_degree_set(G):
 
 def pyramid_pooling(vec, pooling_sizes, pooling_way):
     pooling_vec = []
-    for v in vec:
-        for s in pooling_sizes:
+    # for v in vec:
+    #     for s in pooling_sizes:
+    #         pooling_vec = np.concatenate([pooling_vec, pooling(v, s, pooling_way)])
+    for s in pooling_sizes:
+        for v in vec:
             pooling_vec = np.concatenate([pooling_vec, pooling(v, s, pooling_way)])
+            # print(pooling_vec)
     return pooling_vec
 
 
