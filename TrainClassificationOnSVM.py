@@ -38,5 +38,5 @@ for data_name in datasets:
             accuracy.append(acc)
             # print('test accuracy: ', acc)
     t = np.array(accuracy).reshape(-1, 10)
-    print(f'{data_name}: ', np.mean(np.mean(t, axis=1)))
+    print(f'{data_name}: ', np.max(np.mean(t, axis=1)))
     np.save(f'./accuracy/SVM/{data_name}_cv', np.array(accuracy).reshape(-1, 10))

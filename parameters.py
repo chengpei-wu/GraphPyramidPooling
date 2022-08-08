@@ -1,15 +1,15 @@
 # parameters of GraphPyramidPooling
-pooling_sizes = [1, 2, 4, 8, 16]
-rank_label = 'unique'
+pooling_sizes = [2, 4, 8, 16, 32, 64, 128, 256]
+rank_label = 'degree'
 pooling_attr = [
     'degree',
-    'betweenness',
+    # 'betweenness',
     'average_neighbor_degree',
     'max_neighbor_degree',
     'min_neighbor_degree',
     'std_neighbor_degree',
 ]
-pooling_way = 'max'
+pooling_way = 'mean'
 num_node_attr = 0
 
 # parameters of MLP
@@ -19,7 +19,7 @@ valid = 0.1
 
 # For grpah classification
 datasets = [
-    'MUTAG',
+    # 'MUTAG',
     # 'DD',
     # 'NCI1',
     # 'PTC_MR',
@@ -27,7 +27,7 @@ datasets = [
     # 'COLLAB',
     # 'IMDB-BINARY',
     # 'IMDB-MULTI',
-    # 'REDDIT-BINARY',
+    'REDDIT-BINARY',
     # 'REDDIT-MULTI-5K',
     # 'REDDIT-MULTI-12K'
 ]

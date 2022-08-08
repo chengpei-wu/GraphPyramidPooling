@@ -1,12 +1,13 @@
 import networkx as nx
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 
 def graph2vec(G, rank_label, pooling_sizes, pooling_attr, pooling_way):
     ranking_vec = node_attr_ranking(G, rank_label, pooling_attr)
     # print(ranking_vec)
-    pooling_vector = pyramid_pooling(ranking_vec, pooling_sizes, pooling_way)
+    # pooling_vector = pyramid_pooling(ranking_vec, pooling_sizes, pooling_way)
+    pooling_vector = get_hist(ranking_vec)
     return pooling_vector
 
 
@@ -175,3 +176,14 @@ def pooling(vec, size, pooling_way):
             single_size_pooling_vec.append(np.sum(vec[i * divid:(i + 1) * divid]))
 
     return single_size_pooling_vec
+
+
+def get_hist(vec):
+    hist_vec = []
+    for v in vec:
+        scaler = StandardScaler()
+        v = scaler.fit_transform(np.array(v).reshape(-1, 1))
+        hist_vec = np.concatenate([hist_vec, np.histogram(v, 20)[0]])
+        hist_vec = np.concatenate([hist_vec, np.histogram(v, 50)[0]])
+        hist_vec = np.concatenate([hist_vec, np.histogram(v, 100)[0]])
+    return hist_vec
