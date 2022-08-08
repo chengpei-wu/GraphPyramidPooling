@@ -79,11 +79,8 @@ def node_ranking_by_label(G, pooling_attr, rank_label):
         feature_dic = dict()
         for i in range(len(features)):
             feature_dic[f'{i}'] = features[i]
-        # print(feature_dic)
         feature_dic = sorted(feature_dic.items(), key=lambda x: (x[1][0], x[1][1], x[1][2]), reverse=True)
-        # print(feature_dic)
         ranking_nodes_id = [int(n[0]) for n in feature_dic]
-        # print(ranking_nodes_id)
     ranking_vec = []
     has_node_attr = 'node_attr' in G.nodes[0].keys()
     has_node_label = 'label' in G.nodes[0].keys()
@@ -97,13 +94,13 @@ def node_ranking_by_label(G, pooling_attr, rank_label):
             ranking_node_attr_vec = [node_attr_vec[i][k] for k in ranking_nodes_id]
             ranking_vec.append(ranking_node_attr_vec)
 
-    if has_node_label:
-        node_label_vec = []
-        for i in range(G.number_of_nodes()):
-            node_label_vec.append(G.nodes[i]['label'][0])
-        node_label_vec = np.array(node_label_vec).T
-        ranking_node_label_vec = [node_label_vec[k] for k in ranking_nodes_id]
-        ranking_vec.append(ranking_node_label_vec)
+    # if has_node_label:
+    #     node_label_vec = []
+    #     for i in range(G.number_of_nodes()):
+    #         node_label_vec.append(G.nodes[i]['label'][0])
+    #     node_label_vec = np.array(node_label_vec).T
+    #     ranking_node_label_vec = [node_label_vec[k] for k in ranking_nodes_id]
+    #     ranking_vec.append(ranking_node_label_vec)
 
     for i in pooling_attr:
         if i == 'average_neighbor_degree':

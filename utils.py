@@ -50,7 +50,7 @@ def load_dgl_data(dataset, pooling_sizes, rank_label, pooling_attr, pooling_way)
         num_node_attr = len(data[0][0].nodes[0][0]['node_attr'].numpy().flatten())
         print(f'Number of Node Attributes: {num_node_attr}')
     if has_node_label:
-        print('has_node_label')
+        print('Graph Has Node Labels')
     for id in range(len(data)):
         print('\r',
               f'loading {id} / {len(data)}  network...',
