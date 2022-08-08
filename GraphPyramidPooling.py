@@ -86,6 +86,7 @@ def node_ranking_by_label(G, pooling_attr, rank_label):
         # print(ranking_nodes_id)
     ranking_vec = []
     has_node_attr = 'node_attr' in G.nodes[0].keys()
+    has_node_label = 'label' in G.nodes[0].keys()
 
     if has_node_attr:
         node_attr_vec = []
@@ -95,6 +96,14 @@ def node_ranking_by_label(G, pooling_attr, rank_label):
         for i in range(node_attr_vec.shape[0]):
             ranking_node_attr_vec = [node_attr_vec[i][k] for k in ranking_nodes_id]
             ranking_vec.append(ranking_node_attr_vec)
+
+    if has_node_label:
+        node_label_vec = []
+        for i in range(G.number_of_nodes()):
+            node_label_vec.append(G.nodes[i]['label'][0])
+        node_label_vec = np.array(node_label_vec).T
+        ranking_node_label_vec = [node_label_vec[k] for k in ranking_nodes_id]
+        ranking_vec.append(ranking_node_label_vec)
 
     for i in pooling_attr:
         if i == 'average_neighbor_degree':

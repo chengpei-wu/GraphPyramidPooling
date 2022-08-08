@@ -45,21 +45,25 @@ def load_dgl_data(dataset, pooling_sizes, rank_label, pooling_attr, pooling_way)
     x = []
     labels = []
     has_node_attr = 'node_attr' in data[0][0].nodes[0][0].keys()
+    has_node_label = 'node_labels' in data[0][0].nodes[0][0].keys()
     if has_node_attr:
         num_node_attr = len(data[0][0].nodes[0][0]['node_attr'].numpy().flatten())
-        print(num_node_attr)
+        print(f'Number of Node Attributes: {num_node_attr}')
+    if has_node_label:
+        print('has_node_label')
     for id in range(len(data)):
         print('\r',
               f'loading {id} / {len(data)}  network...',
               end='',
               flush=True)
         graph, label = data[id]
-        # graph = dgl.to_simple_graph(graph)
-        # print(nx.weisfeiler_lehman_graph_hash(G))
         G = nx.DiGraph(dgl.to_networkx(graph))
         if has_node_attr:
             for i in range(G.number_of_nodes()):
                 G.nodes[i]['node_attr'] = graph.nodes[i][0]['node_attr'].numpy().flatten()
+        if has_node_label:
+            for i in range(G.number_of_nodes()):
+                G.nodes[i]['label'] = graph.nodes[i][0]['node_labels'].numpy().flatten()
         x.append(
             graph2vec(
                 G=G,

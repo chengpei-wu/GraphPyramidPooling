@@ -1,5 +1,5 @@
 # parameters of GraphPyramidPooling
-pooling_sizes = [2, 4, 8, 16, 32, 64, 128, 256]
+pooling_sizes = [2, 4, 8, 16]
 rank_label = 'degree'
 pooling_attr = [
     'degree',
@@ -19,7 +19,7 @@ valid = 0.1
 
 # For grpah classification
 datasets = [
-    # 'MUTAG',
+    'MUTAG',
     # 'DD',
     # 'NCI1',
     # 'PTC_MR',
@@ -27,7 +27,7 @@ datasets = [
     # 'COLLAB',
     # 'IMDB-BINARY',
     # 'IMDB-MULTI',
-    'REDDIT-BINARY',
+    # 'REDDIT-BINARY',
     # 'REDDIT-MULTI-5K',
     # 'REDDIT-MULTI-12K'
 ]
