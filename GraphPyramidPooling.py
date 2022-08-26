@@ -62,7 +62,9 @@ def node_ranking_by_self(G, pooling_attr):
 
 def node_ranking_by_label(G, pooling_attr, rank_label):
     scaler = MinMaxScaler()
-    if rank_label == 'degree':
+    if rank_label == 'random':
+        ranking_nodes_id = np.random.permutation(G.number_of_nodes())
+    elif rank_label == 'degree':
         ranking_nodes = sorted(nx.degree(G), key=lambda x: x[1], reverse=True)
         ranking_nodes_id = [n[0] for n in ranking_nodes]
     elif rank_label == 'betweenness':
@@ -85,14 +87,14 @@ def node_ranking_by_label(G, pooling_attr, rank_label):
     has_node_attr = 'node_attr' in G.nodes[0].keys()
     has_node_label = 'label' in G.nodes[0].keys()
 
-    if has_node_attr:
-        node_attr_vec = []
-        for i in range(G.number_of_nodes()):
-            node_attr_vec.append(G.nodes[i]['node_attr'])
-        node_attr_vec = np.array(node_attr_vec).T
-        for i in range(node_attr_vec.shape[0]):
-            ranking_node_attr_vec = [node_attr_vec[i][k] for k in ranking_nodes_id]
-            ranking_vec.append(ranking_node_attr_vec)
+    # if has_node_attr:
+    #     node_attr_vec = []
+    #     for i in range(G.number_of_nodes()):
+    #         node_attr_vec.append(G.nodes[i]['node_attr'])
+    #     node_attr_vec = np.array(node_attr_vec).T
+    #     for i in range(node_attr_vec.shape[0]):
+    #         ranking_node_attr_vec = [node_attr_vec[i][k] for k in ranking_nodes_id]
+    #         ranking_vec.append(ranking_node_attr_vec)
 
     # if has_node_label:
     #     node_label_vec = []
@@ -139,6 +141,11 @@ def node_ranking_by_label(G, pooling_attr, rank_label):
             betweennesses = list(nx.betweenness_centrality(G).items())
             betweenness_vec = [betweennesses[k][1] for k in ranking_nodes_id]
             ranking_vec.append(betweenness_vec)
+
+        if i == 'h':
+            features = np.array([G.nodes[i]['h'].detach().numpy() for i in range(G.number_of_nodes())])
+            feature_vec = [features[k] for k in ranking_nodes_id]
+            ranking_vec = feature_vec
 
     return np.array(ranking_vec)
 

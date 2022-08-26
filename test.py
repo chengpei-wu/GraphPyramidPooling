@@ -1,6 +1,4 @@
 import numpy as np
 
-a = np.arange(100)
-
-b = np.histogram(a, 10)
-print(b[0])
+a = np.random.permutation(10)
+print(a)

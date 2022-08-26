@@ -7,6 +7,14 @@ from sklearn.preprocessing import OneHotEncoder
 from dgl.data import *
 
 
+def node_distribution(dataset):
+    data = TUDataset(dataset)
+    node_numbers = []
+    for i in range(len(data)):
+        node_numbers.append(len(data[i][0].adjacency_matrix()))
+    return node_numbers
+
+
 def load_data(path, isd, roubustness, pooling_sizes):
     # for regression task (robustness prediction)
     mat = sio.loadmat(path)
@@ -77,3 +85,5 @@ def load_dgl_data(dataset, pooling_sizes, rank_label, pooling_attr, pooling_way)
     y = enc.fit_transform(np.array(labels).reshape(-1, 1)).toarray()
     x = np.array(x)
     return x, y, num_classes, num_node_attr
+
+
