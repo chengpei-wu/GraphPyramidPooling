@@ -1,67 +1,19 @@
 import networkx as nx
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 
 def graph2vec(G, rank_label, pooling_sizes, pooling_attr, pooling_way):
     ranking_vec = node_attr_ranking(G, rank_label, pooling_attr)
-    # print(ranking_vec)
     pooling_vector = pyramid_pooling(ranking_vec, pooling_sizes, pooling_way)
-    # pooling_vector = get_hist(ranking_vec)
     return pooling_vector
 
 
 def node_attr_ranking(G, rank_label, pooling_attr):
-    if rank_label == 'self':
-        ranking_vec = node_ranking_by_self(G, pooling_attr)
-    else:
-        ranking_vec = node_ranking_by_label(G, pooling_attr, rank_label)
-    return np.array(ranking_vec)
-
-
-def node_ranking_by_self(G, pooling_attr):
-    scaler = MinMaxScaler()
-    ranking_vec = []
-    has_node_attr = 'node_attr' in G.nodes[0].keys()
-    if has_node_attr:
-        node_attr_vec = []
-        for i in range(G.number_of_nodes()):
-            node_attr_vec.append(G.nodes[i]['node_attr'])
-        node_attr_vec = np.array(node_attr_vec).T
-        for i in range(node_attr_vec.shape[0]):
-            ranking_node_attr_vec = sorted(node_attr_vec[i][:], reverse=True)
-            ranking_vec.append(ranking_node_attr_vec)
-
-    for i in pooling_attr:
-        if i == 'average_neighbor_degree':
-            avn_degrees = [d[1] for d in nx.average_neighbor_degree(G).items()]
-            avn_degree_vec = sorted(avn_degrees, reverse=True)
-            # print(avn_degree_vec)
-            # avn_degree_vec = scaler.fit_transform(np.array(avn_degree_vec).reshape((len(avn_degree_vec), 1)))
-            ranking_vec.append(avn_degree_vec)
-
-        if i == 'degree':
-            degrees = [d[1] for d in nx.degree(G)]
-            degree_vec = sorted(degrees, reverse=True)
-            # print(degree_vec)
-            # degree_vec = scaler.fit_transform(np.array(degree_vec).reshape((len(degree_vec), 1)))
-            ranking_vec.append(degree_vec)
-
-        if i == 'clustering':
-            clusterings = list(nx.clustering(G).items())
-            clustering_vec = sorted(clusterings[:][1], reverse=True)
-            ranking_vec.append(clustering_vec)
-
-        if i == 'betweenness':
-            betweennesses = list(nx.betweenness_centrality(G).items())
-            betweenness_vec = sorted(betweennesses[:][1], reverse=True)
-            ranking_vec.append(betweenness_vec)
-
+    ranking_vec = node_ranking_by_label(G, pooling_attr, rank_label)
     return np.array(ranking_vec)
 
 
 def node_ranking_by_label(G, pooling_attr, rank_label):
-    scaler = MinMaxScaler()
     if rank_label == 'random':
         ranking_nodes_id = np.random.permutation(G.number_of_nodes())
     elif rank_label == 'degree':
@@ -77,7 +29,6 @@ def node_ranking_by_label(G, pooling_attr, rank_label):
             avngs = list(nx.average_neighbor_degree(G).items())
             features[i].append(avngs[i][1])
             features[i].append(bets[i][1])
-        # print(nx.average_neighbor_degree(G))
         feature_dic = dict()
         for i in range(len(features)):
             feature_dic[f'{i}'] = features[i]
@@ -86,23 +37,14 @@ def node_ranking_by_label(G, pooling_attr, rank_label):
     ranking_vec = []
     has_node_attr = 'node_attr' in G.nodes[0].keys()
     has_node_label = 'label' in G.nodes[0].keys()
-
-    # if has_node_attr:
-    #     node_attr_vec = []
-    #     for i in range(G.number_of_nodes()):
-    #         node_attr_vec.append(G.nodes[i]['node_attr'])
-    #     node_attr_vec = np.array(node_attr_vec).T
-    #     for i in range(node_attr_vec.shape[0]):
-    #         ranking_node_attr_vec = [node_attr_vec[i][k] for k in ranking_nodes_id]
-    #         ranking_vec.append(ranking_node_attr_vec)
-
-    # if has_node_label:
-    #     node_label_vec = []
-    #     for i in range(G.number_of_nodes()):
-    #         node_label_vec.append(G.nodes[i]['label'][0])
-    #     node_label_vec = np.array(node_label_vec).T
-    #     ranking_node_label_vec = [node_label_vec[k] for k in ranking_nodes_id]
-    #     ranking_vec.append(ranking_node_label_vec)
+    if has_node_attr:
+        node_attr_vec = []
+        for i in range(G.number_of_nodes()):
+            node_attr_vec.append(G.nodes[i]['node_attr'])
+        node_attr_vec = np.array(node_attr_vec).T
+        for i in range(node_attr_vec.shape[0]):
+            ranking_node_attr_vec = [node_attr_vec[i][k] for k in ranking_nodes_id]
+            ranking_vec.append(ranking_node_attr_vec)
 
     for i in pooling_attr:
         if i == 'average_neighbor_degree':
@@ -110,43 +52,35 @@ def node_ranking_by_label(G, pooling_attr, rank_label):
             avn_degree_vec = [avn_degrees[k][1] for k in ranking_nodes_id]
             # avn_degree_vec = scaler.fit_transform(np.array(avn_degree_vec).reshape((len(avn_degree_vec), 1)))
             ranking_vec.append(avn_degree_vec)
-
         if i == 'max_neighbor_degree':
             max_neighbor_degree_set = [np.max(n) for n in get_neighbor_degree_set(G)]
             maxn_degree_vec = [max_neighbor_degree_set[k] for k in ranking_nodes_id]
             ranking_vec.append(maxn_degree_vec)
-
         if i == 'min_neighbor_degree':
             min_neighbor_degree_set = [np.min(n) for n in get_neighbor_degree_set(G)]
             minn_degree_vec = [min_neighbor_degree_set[k] for k in ranking_nodes_id]
             ranking_vec.append(minn_degree_vec)
-
         if i == 'std_neighbor_degree':
             std_neighbor_degree_set = [np.std(n) for n in get_neighbor_degree_set(G)]
             stdn_degree_vec = [std_neighbor_degree_set[k] for k in ranking_nodes_id]
             ranking_vec.append(stdn_degree_vec)
-
         if i == 'degree':
             degrees = nx.degree(G)
             degree_vec = [degrees[k] for k in ranking_nodes_id]
             # degree_vec = scaler.fit_transform(np.array(degree_vec).reshape((len(degree_vec), 1)))
             ranking_vec.append(degree_vec)
-
         if i == 'clustering':
             clusterings = list(nx.clustering(G).items())
             clustering_vec = [clusterings[k][1] for k in ranking_nodes_id]
             ranking_vec.append(clustering_vec)
-
         if i == 'betweenness':
             betweennesses = list(nx.betweenness_centrality(G).items())
             betweenness_vec = [betweennesses[k][1] for k in ranking_nodes_id]
             ranking_vec.append(betweenness_vec)
-
         if i == 'h':
             features = np.array([G.nodes[i]['h'].detach().numpy() for i in range(G.number_of_nodes())])
             feature_vec = [features[k] for k in ranking_nodes_id]
             ranking_vec = feature_vec
-
     return np.array(ranking_vec)
 
 
@@ -189,14 +123,3 @@ def pooling(vec, size, pooling_way):
             single_size_pooling_vec.append(np.sum(vec[i * divid:(i + 1) * divid]))
 
     return single_size_pooling_vec
-
-
-def get_hist(vec):
-    hist_vec = []
-    for v in vec:
-        scaler = StandardScaler()
-        v = scaler.fit_transform(np.array(v).reshape(-1, 1))
-        hist_vec = np.concatenate([hist_vec, np.histogram(v, 20)[0]])
-        hist_vec = np.concatenate([hist_vec, np.histogram(v, 50)[0]])
-        hist_vec = np.concatenate([hist_vec, np.histogram(v, 100)[0]])
-    return hist_vec

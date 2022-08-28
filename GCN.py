@@ -3,7 +3,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
 from dgl.nn.pytorch import GraphConv
 from GraphPyramidPooling import pyramid_pooling, node_ranking_by_label
 import networkx as nx
@@ -34,9 +33,9 @@ class Classifier(nn.Module):
         )
 
     def forward(self, g):
-        h = g.in_degrees().view(-1, 1).float()  # [N, 1]
-        h = F.relu(self.conv1(g, h))  # [N, hidden_dim]
-        h = F.relu(self.conv2(g, h))  # [N, hidden_dim]
+        h = g.in_degrees().view(-1, 1).float()
+        h = F.relu(self.conv1(g, h))
+        h = F.relu(self.conv2(g, h))
         g.ndata['h'] = h
         if self.readout == 'min':
             hg = dgl.readout_nodes(g, feat='h', op='min')
@@ -50,9 +49,7 @@ class Classifier(nn.Module):
             graphs = dgl.unbatch(g)
             hg = []
             for graph in graphs:
-                G = nx.DiGraph(dgl.to_networkx(graph, node_attrs='h'))
-                vec = node_ranking_by_label(G, ['h'], 'degree')
-                hg.append(pyramid_pooling(vec.T, [1, 2, 4, 8, 16], 'mean'))
+                hg.append(node_embedding_pyramid_pooling(graph, self.pyramid))
             hg = torch.tensor(np.array(hg)).to(torch.float32)
         return self.classify(hg)
 
@@ -60,3 +57,9 @@ class Classifier(nn.Module):
 def collate(samples):
     graphs, labels = map(list, zip(*samples))
     return dgl.batch(graphs), torch.tensor(labels, dtype=torch.long)
+
+
+def node_embedding_pyramid_pooling(graph, pyramid):
+    G = nx.DiGraph(dgl.to_networkx(graph, node_attrs='h'))
+    vec = node_ranking_by_label(G, ['h'], 'degree')
+    return pyramid_pooling(vec.T, pyramid, 'mean')

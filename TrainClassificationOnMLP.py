@@ -18,12 +18,12 @@ for data_name in datasets:
             print(K * N, '--', (K + 1) * N)
             if K == 0:
                 x_train, y_train = x[N:], y[N:]
-                print(N,'--')
+                print(N, '--')
             else:
                 x_train, y_train = np.concatenate((x[:K * N], x[(K + 1) * N:])), np.concatenate(
                     (y[:K * N], y[(K + 1) * N:]))
-                print(0,'--',K * N,'+',(K + 1) * N,'--')
-            
+                print(0, '--', K * N, '+', (K + 1) * N, '--')
+
             print(x_train.shape, y_train.shape)
             print(x_test.shape, y_test.shape)
 

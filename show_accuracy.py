@@ -2,8 +2,14 @@ import numpy as np
 from parameters import datasets
 
 for dataset in datasets:
-    print('{:^15}'.format(dataset),end=': ')
-    for mod in ['SVM']:
-        acc = np.load(f'./accuracy/{mod}/{dataset}_cv.npy')
-        print('{:^6}'.format(round(np.max(np.mean(acc,axis=1))*100, 2)), end=f'({mod})  ')
+    print(f'r-{dataset:^15}', end=': ')
+    # for mod in ['SVM', 'RF']:
+    #     acc = np.load(f'./accuracy/{mod}/{dataset}_random_10cv.npy')
+    #     print(fr'{round(np.mean(acc) * 100, 2):^6}({round(np.std(acc) * 100, 2)})', end=f'({mod})  ')
+    # print()
+
+    print(f'd-{dataset:^15}', end=': ')
+    for mod in ['SVM', 'RF']:
+        acc = np.load(f'./accuracy/{mod}/{dataset}_degree_10cv.npy')
+        print(fr'{round(np.mean(acc) * 100, 2):^6}({round(np.std(acc) * 100, 2)})', end=f'({mod})  ')
     print()

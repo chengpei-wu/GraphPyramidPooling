@@ -1,6 +1,6 @@
 import torch.optim as optim
+from sklearn.model_selection import KFold
 from torch.utils.data import DataLoader
-from sklearn.utils import shuffle
 import torch
 import torch.nn as nn
 import dgl
@@ -8,24 +8,18 @@ import numpy as np
 from sklearn.metrics import accuracy_score
 from GCN import Classifier, collate
 
-# 创建训练集和测试集
-data = dgl.data.TUDataset('MUTAG')
-data = [data[id] for id in range(len(data))]
-data = shuffle(data)
-N = len(data) // 10
+data = dgl.data.TUDataset('DD')
+n_classes = data.num_classes
+data = np.array([data[id] for id in range(len(data))], dtype=object)
+kf = KFold(n_splits=10, shuffle=True)
 acc = []
-for K in range(10):
-    data_test = data[K * N: (K + 1) * N]
-    if K == 0:
-        data_train = data[N:]
-    else:
-        data_train = np.concatenate((data[:K * N], data[(K + 1) * N:]))
+for train_index, test_index in kf.split(data):
+    data_train, data_test = data[train_index], data[test_index]
+    data_loader = DataLoader(data_train, batch_size=64, shuffle=True, collate_fn=collate)
 
-    data_loader = DataLoader(data_train, batch_size=32, shuffle=True,
-                             collate_fn=collate)
-
+    print('xxx')
     # 构造模型
-    model = Classifier(1, 5, 2, 'nppr', [1, 2, 4, 8, 16])
+    model = Classifier(1, 5, n_classes, 'nppr', [1, 2, 4, 8, 16])
     loss_func = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.01)
 
@@ -46,8 +40,7 @@ for K in range(10):
         epoch_losses.append(epoch_loss)
 
     # 测试
-    test_loader = DataLoader(data_test, batch_size=64, shuffle=False,
-                             collate_fn=collate)
+    test_loader = DataLoader(data_test, batch_size=64, shuffle=False, collate_fn=collate)
     model.eval()
     test_pred, test_label = [], []
     with torch.no_grad():
@@ -59,5 +52,4 @@ for K in range(10):
             test_label += label.cpu().numpy().tolist()
     print("Test accuracy: ", accuracy_score(test_label, test_pred))
     acc.append(accuracy_score(test_label, test_pred))
-
 print(acc)

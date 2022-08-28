@@ -87,3 +87,6 @@ def load_dgl_data(dataset, pooling_sizes, rank_label, pooling_attr, pooling_way)
     return x, y, num_classes, num_node_attr
 
 
+def print_progress(now, total, length=20, prefix='progress:'):
+    print('\r' + prefix + ' %.2f%%\t' % (now / total * 100), end='')
+    print('[' + '>' * int(now / total * length) + '-' * int(length - now / total * length) + ']', end='')
