@@ -12,7 +12,7 @@ pooling_way = 'mean'
 num_node_attr = 0
 
 # For graph classification
-classifier = 'SVM'
+classifier = 'RF'
 datasets = [
     # 'MUTAG',
     # 'DD',
