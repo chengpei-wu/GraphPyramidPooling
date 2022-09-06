@@ -5,7 +5,13 @@ from parameters import *
 import numpy as np
 
 for data_name in datasets:
-    x, y, num_classes, num_node_attr = load_dgl_data(pooling_sizes, dataset=data_name)
+    x, y, num_classes, num_node_attr = load_dgl_data(
+        dataset=data_name,
+        pooling_sizes=pooling_sizes,
+        rank_label=rank_label,
+        pooling_attr=pooling_attr,
+        pooling_way=pooling_way
+    )
     all_accuracy = []
     for i in range(10):
         accuracy = []

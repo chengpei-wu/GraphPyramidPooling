@@ -1,10 +1,6 @@
 import numpy as np
-from utils import print_progress, node_distribution
-from sklearn.model_selection import StratifiedKFold, KFold
+from parameters import *
 
-n = node_distribution('REDDIT-MULTI-5K')
-n = sorted(n)
-a = len(n)
-print(a)
-print(np.mean(n))
-print(n[int(a * 0.8)])
+for dataname in datasets:
+    acc = np.load(f'./accuracy/GAT/{dataname}_nppr_10cv.npy')
+    print(dataname, round(np.mean(acc) * 100, 3), round(np.std(acc) * 100, 3))

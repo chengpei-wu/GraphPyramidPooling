@@ -5,6 +5,8 @@ import scipy.io as sio
 from GraphPyramidPooling import graph2vec
 from sklearn.preprocessing import OneHotEncoder
 from dgl.data import *
+import torch
+import os
 
 
 def node_distribution(dataset):
@@ -65,7 +67,7 @@ def load_dgl_data(dataset, pooling_sizes, rank_label, pooling_attr, pooling_way)
               end='',
               flush=True)
         graph, label = data[id]
-        G = nx.DiGraph(dgl.to_networkx(graph))
+        G = nx.Graph(dgl.to_networkx(graph))
         if has_node_attr:
             for i in range(G.number_of_nodes()):
                 G.nodes[i]['node_attr'] = graph.nodes[i][0]['node_attr'].numpy().flatten()
@@ -84,9 +86,43 @@ def load_dgl_data(dataset, pooling_sizes, rank_label, pooling_attr, pooling_way)
         labels.append(label.numpy())
     y = enc.fit_transform(np.array(labels).reshape(-1, 1)).toarray()
     x = np.array(x)
-    return x, y, num_classes, num_node_attr
+    return x, y
 
 
 def print_progress(now, total, length=20, prefix='progress:'):
     print('\r' + prefix + ' %.2f%%\t' % (now / total * 100), end='')
     print('[' + '>' * int(now / total * length) + '-' * int(length - now / total * length) + ']', end='')
+
+
+class EarlyStopping:
+    def __init__(self, patience=7, verbose=False, delta=0, checkpoint_file_path=''):
+        self.patience = patience
+        self.verbose = verbose
+        self.counter = 0
+        self.best_score = None
+        self.early_stop = False
+        self.val_loss_min = np.Inf
+        self.delta = delta
+        self.checkpoint_file_path = checkpoint_file_path
+
+    def __call__(self, val_loss, model):
+        score = -val_loss
+        if self.best_score is None:
+            self.best_score = score
+            self.save_checkpoint(val_loss, model)
+        elif score <= self.best_score + self.delta:
+            self.counter += 1
+            print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
+            if self.counter >= self.patience:
+                self.early_stop = True
+        else:
+            self.best_score = score
+            self.save_checkpoint(val_loss, model)
+            self.counter = 0
+
+    def save_checkpoint(self, val_loss, model):
+        if self.verbose:
+            print(
+                f'valid loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model to {self.checkpoint_file_path}...')
+        torch.save(model.state_dict(), self.checkpoint_file_path)  # 这里会存储迄今最优模型的参数
+        self.val_loss_min = val_loss
