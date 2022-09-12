@@ -10,7 +10,7 @@ from GNN import GCN, GraphSAGE, GAT, collate
 from utils import EarlyStopping
 from parameters import datasets
 
-gnn_model = 'GCN'
+gnn_model = 'GraphSAGE'
 for readout in ['nppr']:
     for data_name, pooling_sizes in zip(datasets.keys(), datasets.values()):
         data = dgl.data.TUDataset(data_name)

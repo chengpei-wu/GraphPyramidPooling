@@ -21,16 +21,18 @@ for data_name, pooling_sizes in zip(datasets.keys(), datasets.values()):
     all_accuracy = []
     for i in range(10):
         accuracy = []
-        kf = KFold(n_splits=10, shuffle=True)
-        for train_index, test_index in kf.split(x):
-            # kf = StratifiedKFold(n_splits=10, shuffle=True)
-            # for train_index, test_index in kf.split(x, np.argmax(y, axis=1)):
+        # kf = KFold(n_splits=10, shuffle=True)
+        # for train_index, test_index in kf.split(x):
+        kf = StratifiedKFold(n_splits=10, shuffle=True)
+        for train_index, test_index in kf.split(x, np.argmax(y, axis=1)):
             x_train, y_train = x[train_index], y[train_index]
             x_test, y_test = x[test_index], y[test_index]
             acc = 0
             if classifier == 'SVM':
                 svm_rbf = SVC(
                     kernel='rbf',
+                    C=1,
+                    gamma=0.1
                 )
                 grid_param = {
                     'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000],
@@ -41,18 +43,34 @@ for data_name, pooling_sizes in zip(datasets.keys(), datasets.values()):
                     param_grid=grid_param,
                     verbose=0
                 )
-                grid_search.fit(x_train, np.argmax(y_train, axis=1))
-                svm_rbf.C = grid_search.best_params_['C']
-                svm_rbf.gamma = grid_search.best_params_['gamma']
-                print(grid_search.best_params_, grid_search.best_score_)
+                # grid_search.fit(x_train, np.argmax(y_train, axis=1))
+                # svm_rbf.C = grid_search.best_params_['C']
+                # svm_rbf.gamma = grid_search.best_params_['gamma']
+                # print(grid_search.best_params_, grid_search.best_score_)
                 svm_rbf.fit(x_train, np.argmax(y_train, axis=1))
                 acc = svm_rbf.score(x_test, np.argmax(y_test, axis=1))
             if classifier == 'RF':
                 rfc = RandomForestClassifier(oob_score=True)
+                grid_param = {
+                    'n_estimators': [40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160],
+                }
+                grid_search = GridSearchCV(
+                    estimator=rfc,
+                    param_grid=grid_param,
+                    verbose=0
+                )
+                # grid_search.fit(x_train, y_train)
+                # rfc.n_estimators = grid_search.best_params_['n_estimators']
+                # print(grid_search.best_params_, grid_search.best_score_)
                 rfc.fit(x_train, y_train)
                 acc = rfc.score(x_test, y_test)
             if classifier == 'GBDT':
-                gbdt = GradientBoostingClassifier(learning_rate=0.01)
+                gbdt = GradientBoostingClassifier(
+                    # learning_rate=0.1,
+                    # min_samples_leaf=2,
+                    # min_samples_split=10,
+                    # n_estimators=120
+                )
                 gbdt.fit(x_train, np.argmax(y_train, axis=1))
                 acc = gbdt.score(x_test, np.argmax(y_test, axis=1))
             if classifier == 'MLP':
