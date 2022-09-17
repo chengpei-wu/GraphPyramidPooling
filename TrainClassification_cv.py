@@ -3,10 +3,8 @@ from utils import load_dgl_data
 from parameters import *
 import numpy as np
 from sklearn.svm import SVC
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from sklearn.model_selection import StratifiedKFold, GridSearchCV, KFold
-from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import StratifiedKFold, GridSearchCV, train_test_split
 
 scaler = MinMaxScaler()
 for data_name, pooling_sizes in zip(datasets.keys(), datasets.values()):
@@ -18,7 +16,6 @@ for data_name, pooling_sizes in zip(datasets.keys(), datasets.values()):
         pooling_way=pooling_way
     )
     x = scaler.fit_transform(x)
-
     if classifier == 'SVM':
         svm_rbf = SVC(
             kernel='rbf',

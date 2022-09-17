@@ -4,7 +4,6 @@ import math
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 
 def graph2vec(G, rank_label, pooling_sizes, pooling_attr, pooling_way):
@@ -42,14 +41,6 @@ def node_ranking_by_label(G, pooling_attr, rank_label):
     ranking_vec = []
     has_node_attr = 'node_attr' in G.nodes[0].keys()
     has_node_label = 'label' in G.nodes[0].keys()
-    # if has_node_attr:
-    #     node_attr_vec = []
-    #     for i in range(G.number_of_nodes()):
-    #         node_attr_vec.append(G.nodes[i]['node_attr'])
-    #     node_attr_vec = np.array(node_attr_vec).T
-    #     for i in range(node_attr_vec.shape[0]):
-    #         ranking_node_attr_vec = [node_attr_vec[i][k] for k in ranking_nodes_id]
-    #         ranking_vec.append(ranking_node_attr_vec)
 
     for i in pooling_attr:
         if i == 'average_neighbor_degree':

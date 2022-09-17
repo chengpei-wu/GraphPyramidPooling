@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from dgl.nn.pytorch import GraphConv, SAGEConv, GATConv
 from GraphPyramidPooling import pyramid_pooling, node_ranking_by_label
 import networkx as nx
-from PP import PyramidPooling
+from PyramidPooling import PyramidPooling
 
 
 class GCN(nn.Module):

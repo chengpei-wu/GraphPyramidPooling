@@ -6,7 +6,6 @@ from GraphPyramidPooling import graph2vec
 from sklearn.preprocessing import OneHotEncoder
 from dgl.data import *
 import torch
-import os
 
 
 def node_distribution(dataset):
