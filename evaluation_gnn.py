@@ -97,7 +97,7 @@ def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10
                 for it, (batchg, label) in enumerate(test_loader):
                     if allow_cuda:
                         batchg, label = batchg.to(device), label.to(device)
-                    pred = np.argmax(model(batchg), axis=1).tolist()
+                    pred = np.argmax(model(batchg).cpu(), axis=1).tolist()
                     test_pred += pred
                     test_label += label.cpu().numpy().tolist()
             acc.append(accuracy_score(test_label, test_pred))
