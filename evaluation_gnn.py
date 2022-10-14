@@ -105,6 +105,3 @@ def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10
         print(np.mean(acc), np.std(acc))
         scores.append(acc)
     np.save(f'./accuracy/{gnn_model}/{dataset}_{readout}_10cv', np.array(scores))
-
-
-evaluation_gnn('GCN', 'nppr', 'MUTAG', [1, 2, 4, 8, 16], fold=10, times=10, allow_cuda=True)
