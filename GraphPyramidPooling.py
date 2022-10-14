@@ -1,9 +1,10 @@
+import math
+
 import networkx as nx
 import numpy as np
-import math
 import torch
-import torch.nn.functional as F
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 def graph2vec(G, rank_label, pooling_sizes, pooling_attr, pooling_way):

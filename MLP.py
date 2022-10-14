@@ -1,10 +1,12 @@
-from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping
-from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.layers import *
-from sklearn.utils import shuffle
-from tensorflow.keras import optimizers
 import os
 import warnings
+
+from sklearn.utils import shuffle
+from tensorflow.keras import optimizers
+from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping
+from tensorflow.keras.layers import *
+from tensorflow.keras.models import Sequential, load_model
+
 from parameters import pooling_attr
 
 warnings.filterwarnings('ignore')

@@ -1,12 +1,11 @@
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from utils import load_dgl_data
-from parameters import *
 import numpy as np
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.model_selection import StratifiedKFold, cross_val_score
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from sklearn.model_selection import StratifiedKFold, GridSearchCV, KFold, cross_val_score
-from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import accuracy_score
+
+from parameters import *
+from utils import load_dgl_data
 
 scaler = MinMaxScaler()
 for data_name, pooling_sizes in zip(datasets.keys(), datasets.values()):

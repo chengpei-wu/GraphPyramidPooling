@@ -1,13 +1,14 @@
-import torch.optim as optim
-from sklearn.model_selection import StratifiedKFold
-from torch.utils.data import DataLoader
-import torch
-import torch.nn as nn
 import dgl
 import numpy as np
+import torch
+import torch.nn as nn
+import torch.optim as optim
 from sklearn.metrics import accuracy_score
-from GNN import GCN, GraphSAGE, GAT, collate
-from utils import EarlyStopping
+from sklearn.model_selection import StratifiedKFold
+from torch.utils.data import DataLoader
+
+from GNNs import EarlyStopping
+from GNNs import GCN, GraphSAGE, GAT, collate
 from parameters import datasets
 
 gnn_model = 'GraphSAGE'
