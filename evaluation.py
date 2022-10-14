@@ -4,24 +4,27 @@ from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
 
-from parameters import *
 from utils import load_dgl_data
 
-scaler = MinMaxScaler()
-for data_name, pooling_sizes in zip(datasets.keys(), datasets.values()):
+
+def evaluation(dataset, pooling_sizes, classifier, params=None, fold=10, times=10):
+    # Default execution 10 times of 10-fold cross validation.
+    scaler = MinMaxScaler()
     x, y = load_dgl_data(
-        dataset=data_name,
+        dataset=dataset,
         pooling_sizes=pooling_sizes,
-        rank_label=rank_label,
-        pooling_attr=pooling_attr,
-        pooling_way=pooling_way
+        rank_label='degree',
+        pooling_attr=['degree'],
+        pooling_way='mean'
     )
     x = scaler.fit_transform(x)
-    for i in range(10):
-        accuracy = []
-        kf = StratifiedKFold(n_splits=10, shuffle=True)
+    scores = []
+    for i in range(times):
+        kf = StratifiedKFold(n_splits=fold, shuffle=True)
         if classifier == 'SVM':
             svm_rbf = SVC()
+            if params:
+                svm_rbf.set_params(**params)
             cv_score = cross_val_score(svm_rbf, x, np.argmax(y, axis=1), cv=kf)
         if classifier == 'RF':
             rfc = RandomForestClassifier(oob_score=True)
@@ -29,4 +32,5 @@ for data_name, pooling_sizes in zip(datasets.keys(), datasets.values()):
         if classifier == 'GBDT':
             gbdt = GradientBoostingClassifier()
             cv_score = cross_val_score(gbdt, x, np.argmax(y, axis=1), cv=kf)
-        print(cv_score.mean())
+        scores.append(cv_score)
+    print(f'\nFinished {times} times of {fold}-fold cross validation.\nACCURACY SCORE: {np.mean(scores)}')

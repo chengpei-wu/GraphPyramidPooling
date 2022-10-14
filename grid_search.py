@@ -16,6 +16,7 @@ for data_name, pooling_sizes in zip(datasets.keys(), datasets.values()):
         pooling_attr=pooling_attr,
         pooling_way=pooling_way
     )
+    print(x.shape)
     x = scaler.fit_transform(x)
     if classifier == 'SVM':
         svm_rbf = SVC(

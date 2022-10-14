@@ -46,11 +46,8 @@ def load_data(path, isd, roubustness, pooling_sizes):
 
 
 def load_dgl_data(dataset, pooling_sizes, rank_label, pooling_attr, pooling_way):
-    # for classification task (graph classification, real-world networks)
     enc = OneHotEncoder()
     data = TUDataset(dataset)
-    num_classes = data.num_classes
-    num_node_attr = 0
     x = []
     labels = []
     has_node_attr = 'node_attr' in data[0][0].nodes[0][0].keys()
