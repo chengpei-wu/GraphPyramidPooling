@@ -22,7 +22,9 @@ def evaluation(dataset, pooling_sizes, classifier, params=None, fold=10, times=1
     for i in range(times):
         kf = StratifiedKFold(n_splits=fold, shuffle=True)
         if classifier == 'SVM':
-            svm_rbf = SVC()
+            svm_rbf = SVC(
+                kernel='rbf'
+            )
             if params:
                 svm_rbf.set_params(**params)
             cv_score = cross_val_score(svm_rbf, x, np.argmax(y, axis=1), cv=kf)

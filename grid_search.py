@@ -4,17 +4,17 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
 
-from parameters import *
 from utils import load_dgl_data
 
-scaler = MinMaxScaler()
-for data_name, pooling_sizes in zip(datasets.keys(), datasets.values()):
+
+def search_params(dataset, pooling_sizes, classifier, fold=10, times=10):
+    scaler = MinMaxScaler()
     x, y = load_dgl_data(
-        dataset=data_name,
+        dataset=dataset,
         pooling_sizes=pooling_sizes,
-        rank_label=rank_label,
-        pooling_attr=pooling_attr,
-        pooling_way=pooling_way
+        rank_label='degree',
+        pooling_attr=['degree'],
+        pooling_way='mean'
     )
     print(x.shape)
     x = scaler.fit_transform(x)
@@ -26,6 +26,7 @@ for data_name, pooling_sizes in zip(datasets.keys(), datasets.values()):
             'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000],
             'gamma': [0.01, 0.1, 1, 10, 100]
         }
+        svm_rbf.set_params(**grid_param)
         grid_search = GridSearchCV(
             estimator=svm_rbf,
             param_grid=grid_param,
