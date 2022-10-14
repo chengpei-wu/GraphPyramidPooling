@@ -12,6 +12,12 @@ from GNNs import GCN, GraphSAGE, GAT, collate
 
 
 def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10, allow_cuda=False):
+    if allow_cuda:
+        device = ''
+        if torch.cuda.is_available():
+            device = 'cuda:0'
+        else:
+            device = 'cpu'
     data = dgl.data.TUDataset(dataset)
     n_classes = data.num_classes
     data = np.array([data[id] for id in range(len(data))], dtype=object)
@@ -25,7 +31,7 @@ def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10
     else:
         model = GAT(1, 16, n_classes, [4, 1], readout, pooling_sizes)
     if allow_cuda:
-        model = model.cuda()
+        model = model.to(device)
     for time in range(times):
         acc = []
         cv = 0
@@ -55,8 +61,8 @@ def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10
                 epoch_loss = 0
                 for iter, (batchg, label) in enumerate(data_loader):
                     if allow_cuda:
-                        batchg, label = batchg.cuda(), label.cuda()
-                        loss_func = loss_func.cuda()
+                        batchg, label = batchg.to(device), label.to(device)
+                        loss_func = loss_func.to(device)
                     prediction = model(batchg)
                     loss = loss_func(prediction, label)
                     optimizer.zero_grad()
@@ -72,8 +78,8 @@ def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10
                 with torch.no_grad():
                     for it, (batchg, label) in enumerate(valid_loader):
                         if allow_cuda:
-                            batchg, label = batchg.cuda(), label.cuda()
-                            loss_func = loss_func.cuda()
+                            batchg, label = batchg.to(device), label.to(device)
+                            loss_func = loss_func.to(device)
                         prediction = model(batchg)
                         loss = loss_func(prediction, label)
                         valid_loss += loss.detach().item()
@@ -90,7 +96,7 @@ def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10
             with torch.no_grad():
                 for it, (batchg, label) in enumerate(test_loader):
                     if allow_cuda:
-                        batchg, label = batchg.cuda(), label.cuda()
+                        batchg, label = batchg.to(device), label.to(device)
                     pred = np.argmax(model(batchg), axis=1).tolist()
                     test_pred += pred
                     test_label += label.cpu().numpy().tolist()
@@ -101,4 +107,4 @@ def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10
     np.save(f'./accuracy/{gnn_model}/{dataset}_{readout}_10cv', np.array(scores))
 
 
-evaluation_gnn('GCN', 'nppr', 'MUTAG', [1, 2, 4, 8, 16], fold=10, times=10)
+evaluation_gnn('GCN', 'nppr', 'MUTAG', [1, 2, 4, 8, 16], fold=10, times=10, allow_cuda=True)
