@@ -11,7 +11,7 @@ from GNNs import EarlyStopping
 from GNNs import GCN, GraphSAGE, GAT, collate
 
 
-def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10, allow_cuda=False):
+def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10, epoches=150, allow_cuda=False):
     if allow_cuda:
         device = ''
         if torch.cuda.is_available():
@@ -37,8 +37,8 @@ def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10
         cv = 0
         for train_index, test_index in kf.split(data, labels):
             cv += 1
-            early_stop = EarlyStopping(30, verbose=True,
-                                       checkpoint_file_path=f'./checkpoints/{gnn_model}_checkpoint.pt')
+            # early_stop = EarlyStopping(30, verbose=True,
+            #                            checkpoint_file_path=f'./checkpoints/{gnn_model}_checkpoint.pt')
             data_train, data_test = data[train_index], data[test_index]
             len_train = int(len(data_train) * 0.9)
             data_loader = DataLoader(data_train[:len_train], batch_size=256, shuffle=True, collate_fn=collate)
@@ -56,7 +56,7 @@ def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10
             )
             # 模型训练
             epoch_losses = []
-            for epoch in range(200):
+            for epoch in range(epoches):
                 model.train()
                 epoch_loss = 0
                 for iter, (batchg, label) in enumerate(data_loader):
@@ -73,24 +73,25 @@ def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10
                 print(f'{gnn_model}({readout}): {dataset}_times{time}_cv{cv}_epoch: {epoch}, loss {epoch_loss}')
                 epoch_losses.append(epoch_loss)
                 # early_stopping
-                model.eval()
-                valid_loss = 0
-                with torch.no_grad():
-                    for it, (batchg, label) in enumerate(valid_loader):
-                        if allow_cuda:
-                            batchg, label = batchg.to(device), label.to(device)
-                            loss_func = loss_func.to(device)
-                        prediction = model(batchg)
-                        loss = loss_func(prediction, label)
-                        valid_loss += loss.detach().item()
-                    valid_loss /= (it + 1)
-                reduce_lr.step(valid_loss)
-                early_stop(valid_loss, model)
-                if early_stop.early_stop:
-                    print("Early stopping")
-                    break
+                # model.eval()
+                # valid_loss = 0
+                # with torch.no_grad():
+                #     for it, (batchg, label) in enumerate(valid_loader):
+                #         if allow_cuda:
+                #             batchg, label = batchg.to(device), label.to(device)
+                #             loss_func = loss_func.to(device)
+                #         prediction = model(batchg)
+                #         loss = loss_func(prediction, label)
+                #         valid_loss += loss.detach().item()
+                #     valid_loss /= (it + 1)
+                # reduce_lr.step(valid_loss)
+                # early_stop(valid_loss, model)
+                # if early_stop.early_stop:
+                #     print("Early stopping")
+                #     break
+            # model.load_state_dict(torch.load(f'./checkpoints/{gnn_model}_checkpoint.pt'))
+
             # 测试
-            model.load_state_dict(torch.load(f'./checkpoints/{gnn_model}_checkpoint.pt'))
             model.eval()
             test_pred, test_label = [], []
             with torch.no_grad():
