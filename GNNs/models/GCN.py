@@ -13,21 +13,13 @@ class GCN(nn.Module):
         self.conv1 = GraphConv(in_dim, hidden_dim, activation=F.relu)
         self.conv2 = GraphConv(hidden_dim, hidden_dim, activation=F.relu)
         if self.readout != 'nppr':
-            self.input_layer = nn.Linear(hidden_dim, 512)
+            self.input_layer = nn.Linear(hidden_dim, n_classes)
         else:
             self.nfpp_layer = PyramidPooling(self.pyramid)
-            self.input_layer = nn.Linear(hidden_dim * sum(pyramid), 512)
+            self.input_layer = nn.Linear(hidden_dim * sum(pyramid), n_classes)
         self.classify = nn.Sequential(
             self.input_layer,
-            nn.ReLU(),
-            nn.Linear(512, 1024),
-            nn.ReLU(),
-            nn.Linear(1024, 1024),
-            nn.ReLU(),
-            nn.Linear(1024, 512),
-            nn.ReLU(),
-            nn.Linear(512, n_classes),
-            nn.Softmax(),
+            nn.Dropout(0.5)
         )
 
     def forward(self, g):

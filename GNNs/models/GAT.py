@@ -13,21 +13,13 @@ class GAT(nn.Module):
         self.conv1 = GATConv(in_size, hid_size, heads[0], activation=F.relu)
         self.conv2 = GATConv(hid_size * heads[0], hid_size, heads[1], activation=F.relu)
         if self.readout != 'nppr':
-            self.input_layer = nn.Linear(hid_size, 512)
+            self.input_layer = nn.Linear(hid_size, out_size)
         else:
             self.nfpp_layer = PyramidPooling(self.pyramid)
-            self.input_layer = nn.Linear(hid_size * sum(pyramid), 512)
+            self.input_layer = nn.Linear(hid_size * sum(pyramid), out_size)
         self.classify = nn.Sequential(
             self.input_layer,
-            nn.ReLU(),
-            nn.Linear(512, 1024),
-            nn.ReLU(),
-            nn.Linear(1024, 1024),
-            nn.ReLU(),
-            nn.Linear(1024, 512),
-            nn.ReLU(),
-            nn.Linear(512, out_size),
-            nn.Softmax(),
+            nn.Dropout(0.5)
         )
 
     def forward(self, g):
