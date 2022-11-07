@@ -13,7 +13,7 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-def test(model, data_loader, device):
+def eval(model, data_loader, device):
     # 测试
     model.eval()
     test_pred, test_label = [], []
@@ -27,16 +27,16 @@ def test(model, data_loader, device):
     return acc
 
 
-def valid(model, data_loader, early_stop, device):
-    valid_acc = test(model, data_loader, device)
+def valid(model, valid_loader, early_stop, device):
+    valid_acc = eval(model, valid_loader, device)
     early_stop(valid_acc, model)
 
 
-def train_gnn(model, data_loader, valid_loader, epoches, device, gnn_model, readout, time, cv, dataset):
+def train(model, data_loader, valid_loader, epoches, device, gnn_model, readout, time, cv, dataset):
     loss_func = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.01)
     early_stop = EarlyStopping(
-        epoches,
+        epoches // 2,
         verbose=True,
         checkpoint_file_path=f'./checkpoints/{gnn_model}_checkpoint.pt'
     )
@@ -88,7 +88,7 @@ def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10
             else:
                 model = GAT(1, 16, n_classes, [4, 1], readout, pooling_sizes)
             model = model.to(device)
-            train_gnn(
+            train(
                 model=model,
                 data_loader=data_loader,
                 valid_loader=valid_loader,
@@ -101,7 +101,7 @@ def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10
                 dataset=dataset
             )
             model.load_state_dict(torch.load(f'./checkpoints/{gnn_model}_checkpoint.pt'))
-            acc = test(model, test_loader, device)
+            acc = eval(model, test_loader, device)
             scores.append(acc)
             print(scores)
     np.save(f'./accuracy/{gnn_model}/{dataset}_{readout}_10cv', np.array(scores))
