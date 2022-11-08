@@ -14,7 +14,6 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 
 def eval(model, data_loader, device):
-    # 测试
     model.eval()
     test_pred, test_label = [], []
     with torch.no_grad():
@@ -30,21 +29,22 @@ def eval(model, data_loader, device):
 def valid(model, valid_loader, early_stop, device):
     valid_acc = eval(model, valid_loader, device)
     early_stop(valid_acc, model)
+    return valid_acc
 
 
 def train(model, data_loader, valid_loader, epoches, device, gnn_model, readout, time, cv, dataset):
     loss_func = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.01)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
     early_stop = EarlyStopping(
         epoches // 2,
         verbose=True,
         checkpoint_file_path=f'./checkpoints/{gnn_model}_checkpoint.pt'
     )
     # 模型训练
-    epoch_losses = []
+    epoch_acc = []
     for epoch in range(epoches):
         model.train()
-        epoch_loss = 0
         for iter, (batchg, label) in enumerate(data_loader):
             batchg, label = batchg.to(device), label.to(device)
             loss_func = loss_func.to(device)
@@ -53,17 +53,19 @@ def train(model, data_loader, valid_loader, epoches, device, gnn_model, readout,
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            epoch_loss += loss.detach().item()
-        epoch_loss /= (iter + 1)
-        print(f'{gnn_model}({readout}): {dataset}_times{time}_cv{cv}_epoch: {epoch}, loss {epoch_loss}')
-        epoch_losses.append(epoch_loss)
-        valid(model, valid_loader, early_stop, device)
+        scheduler.step()
+        train_acc = eval(model, data_loader, device)
+        valid_acc = valid(model, valid_loader, early_stop, device)
+        lr = optimizer.state_dict()['param_groups'][0]['lr']
+        print(
+            f'{gnn_model}({readout}): {dataset}_times{time}_cv{cv}_epoch: {epoch}, lr: {lr}, acc: {train_acc}, val_acc: {valid_acc}')
+        epoch_acc.append(train_acc)
         if early_stop.early_stop:
             print("Early stopping")
             break
 
 
-def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10, epoches=100, allow_cuda=False):
+def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10, epoches=120, allow_cuda=False):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     data = dgl.data.TUDataset(dataset)
     n_classes = data.num_classes
