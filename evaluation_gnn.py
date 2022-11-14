@@ -27,7 +27,7 @@ def eval(model, data_loader, device):
     return acc
 
 
-def valid(model, valid_loader, device):
+def valid(model, valid_loader, loss_func, device):
     model.eval()
     valid_loss = 0
     with torch.no_grad():
@@ -70,7 +70,8 @@ def train(model, data_loader, valid_loader, epoches, device, gnn_model, readout,
             optimizer.step()
             epoch_loss += loss.detach().item()
         epoch_loss /= (iter + 1)
-        valid_loss = valid(model, valid_loader, device)
+
+        valid_loss = valid(model, valid_loader, loss_func, device)
         reduce_lr.step(valid_loss)
 
         if epoch % 10 == 0:
