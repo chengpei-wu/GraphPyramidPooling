@@ -23,28 +23,43 @@ def eval(model, data_loader, device):
             test_pred += pred
             test_label += label.cpu().numpy().tolist()
     acc = accuracy_score(test_label, test_pred)
+    print(f'\nTEST ACCURACY SCORE: {acc}')
     return acc
 
 
-def valid(model, valid_loader, early_stop, device):
-    valid_acc = eval(model, valid_loader, device)
-    early_stop(valid_acc, model)
-    return valid_acc
+def valid(model, valid_loader, device):
+    model.eval()
+    valid_loss = 0
+    with torch.no_grad():
+        for it, (batchg, label) in enumerate(valid_loader):
+            batchg, label = batchg.to(device), label.to(device)
+            loss_func = loss_func.to(device)
+            prediction = model(batchg)
+            loss = loss_func(prediction, label)
+            valid_loss += loss.detach().item()
+        valid_loss /= (it + 1)
+    return valid_loss
 
 
 def train(model, data_loader, valid_loader, epoches, device, gnn_model, readout, time, cv, dataset):
     loss_func = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.01)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
+    reduce_lr = optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer,
+        patience=20,
+        threshold=1e-5,
+        min_lr=1e-8,
+        verbose=True
+    )
     early_stop = EarlyStopping(
-        epoches // 2,
+        40,
         verbose=True,
         checkpoint_file_path=f'./checkpoints/{gnn_model}_checkpoint.pt'
     )
     # 模型训练
-    epoch_acc = []
     for epoch in range(epoches):
         model.train()
+        epoch_loss = 0
         for iter, (batchg, label) in enumerate(data_loader):
             batchg, label = batchg.to(device), label.to(device)
             loss_func = loss_func.to(device)
@@ -53,19 +68,27 @@ def train(model, data_loader, valid_loader, epoches, device, gnn_model, readout,
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-        scheduler.step()
-        train_acc = eval(model, data_loader, device)
-        valid_acc = valid(model, valid_loader, early_stop, device)
-        lr = optimizer.state_dict()['param_groups'][0]['lr']
-        print(
-            f'{gnn_model}({readout}): {dataset}_times{time}_cv{cv}_epoch: {epoch}, lr: {lr}, acc: {train_acc}, val_acc: {valid_acc}')
-        epoch_acc.append(train_acc)
+            epoch_loss += loss.detach().item()
+        epoch_loss /= (iter + 1)
+        valid_loss = valid(model, valid_loader, device)
+        reduce_lr.step(valid_loss)
+
+        if epoch % 10 == 0:
+            print(
+                '\r',
+                f'{gnn_model}({readout}): {dataset}_times{time}_cv{cv}_epoch: {epoch}, loss: {round(epoch_loss, 5)}, val_loss: {round(valid_loss, 5)}',
+                end='',
+                flush=True
+            )
+
+        # early_stopping
+        early_stop(epoch_loss + valid_loss, model)
         if early_stop.early_stop:
             print("Early stopping")
             break
 
 
-def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10, epoches=120, allow_cuda=False):
+def evaluation_gnn(gnn_model, readout, dataset, pooling_sizes, fold=10, times=10, epoches=150):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     data = dgl.data.TUDataset(dataset)
     n_classes = data.num_classes
